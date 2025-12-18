@@ -1,0 +1,137 @@
+{
+	"name": "df_gold_dim_stores",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_tabla_stores",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_gold_dim_Country",
+						"type": "DatasetReference"
+					},
+					"name": "country"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_gold_dim_city",
+						"type": "DatasetReference"
+					},
+					"name": "city"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_gold_dim_store",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Store_ID as string,",
+				"          Store_Name as string,",
+				"          City as string,",
+				"          Country as string,",
+				"          Opened as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          countryId as integer,",
+				"          countryName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> country",
+				"source(output(",
+				"          cityId as integer,",
+				"          cityName as string,",
+				"          countryId as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> city",
+				"source1, country join(Country == countryName,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, city join(City == cityName,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"select1 aggregate(groupBy(Store_ID),",
+				"     each(match(name!='Store_ID'), $$ = first($$))) ~> aggregate1",
+				"join2 select(mapColumn(",
+				"          Store_ID,",
+				"          Store_Name,",
+				"          City,",
+				"          Country,",
+				"          Opened,",
+				"          countryId = country@countryId,",
+				"          countryName,",
+				"          cityId,",
+				"          cityName,",
+				"          countryId1 = city@countryId",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Store_ID as string,",
+				"          Store_Name as string,",
+				"          City_id as integer,",
+				"          Country_id as integer,",
+				"          Year_opened as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Store_ID,",
+				"          Store_Name,",
+				"          City_id = cityId,",
+				"          Country_id = countryId,",
+				"          Year_opened = Opened",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
