@@ -1,0 +1,9 @@
+{
+	"name": "adf-ucb-dw-apple-sales",
+	"location": "chilecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d6a0aadf-4c58-4d9a-b401-23db6436d71f",
+		"tenantId": "cc28633f-12b8-46cb-bc15-951dae239b4d"
+	}
+}
