@@ -29,18 +29,35 @@
 					"name": "warranty"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_gold_dim_date",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "union1"
 				},
 				{
 					"name": "union2"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
-				"          sale_date as timestamp",
+				"          date as timestamp",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -48,7 +65,7 @@
 				"     query: 'SELECT DISTINCT  sale_date AS date FROM silver.sales',",
 				"     format: 'query') ~> sales",
 				"source(output(",
-				"          Launch_Date as timestamp",
+				"          date as timestamp",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -56,18 +73,51 @@
 				"     query: 'SELECT DISTINCT Launch_Date AS date FROM silver.products',",
 				"     format: 'query') ~> product",
 				"source(output(",
-				"          claim_id as string,",
-				"          claim_date as timestamp,",
-				"          sale_id as string,",
-				"          repair_status as string",
+				"          date as timestamp",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT DISTINCT claim_date AS dateFROM silver.warranty as date',",
+				"     query: 'SELECT DISTINCT claim_date AS date FROM silver.warranty ',",
 				"     format: 'query') ~> warranty",
 				"sales, product union(byName: true)~> union1",
-				"union1, warranty union(byName: true)~> union2"
+				"union1, warranty union(byName: true)~> union2",
+				"union2 sort(asc(date, true)) ~> sort1",
+				"sort1 aggregate(groupBy(date),",
+				"     each(match(name!='date'), $$ = first($$))) ~> aggregate1",
+				"aggregate1 derive(year = year(date),",
+				"          month = month(date),",
+				"          monthName = toString(date, 'MMM'),",
+				"          day = dayOfMonth(date),",
+				"          weekdayName = toString(date,'EEE')) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          dateId as integer,",
+				"          fullDate as timestamp,",
+				"          year as integer,",
+				"          month as integer,",
+				"          monthName as string,",
+				"          day as integer,",
+				"          quarter as integer,",
+				"          weekdayName as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          fullDate = date,",
+				"          year,",
+				"          month,",
+				"          monthName,",
+				"          day,",
+				"          weekdayName",
+				"     )) ~> sink1"
 			]
 		}
 	}
