@@ -1,5 +1,5 @@
 {
-	"name": "df_dim_sales",
+	"name": "df_hechos_warranty",
 	"properties": {
 		"folder": {
 			"name": "Gold"
@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "ds_silver_tabla_sales",
+						"referenceName": "ds_silver_tabla_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -25,7 +25,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_gold_dim_sales",
+						"referenceName": "ds_gold_hechos_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -33,16 +33,15 @@
 			],
 			"transformations": [
 				{
-					"name": "join"
+					"name": "join1"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
-				"          sale_jd as string,",
-				"          sale_date as timestamp,",
-				"          store_id as string,",
-				"          product_id as string,",
-				"          quantity as integer",
+				"          claim_id as string,",
+				"          claim_date as timestamp,",
+				"          sale_id as string,",
+				"          repair_status as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -62,19 +61,18 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source2",
-				"source1, source2 join(sale_date == fullDate,",
+				"source1, source2 join(claim_date == fullDate,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join",
-				"join sink(allowSchemaDrift: true,",
+				"     broadcast: 'auto')~> join1",
+				"join1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
-				"          sale_jd as string,",
-				"          sale_date_id as integer,",
-				"          store_id as string,",
-				"          product_id as string,",
-				"          quantity as integer",
+				"          claim_id as string,",
+				"          claim_date_id as integer,",
+				"          sale_id as string,",
+				"          repair_status as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -85,11 +83,10 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          sale_jd,",
-				"          sale_date_id = dateId,",
-				"          store_id,",
-				"          product_id,",
-				"          quantity",
+				"          claim_id,",
+				"          claim_date_id = dateId,",
+				"          sale_id,",
+				"          repair_status",
 				"     )) ~> sink1"
 			]
 		}
