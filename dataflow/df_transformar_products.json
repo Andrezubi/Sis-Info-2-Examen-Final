@@ -1,0 +1,100 @@
+{
+	"name": "df_transformar_products",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_tabla_products",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_tabla_products",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Product_ID as string,",
+				"          Product_Name as string,",
+				"          Category_ID as string,",
+				"          Launch_Date as string,",
+				"          Price as string,",
+				"          notes as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"derivedColumn1 cast(output(",
+				"          Launch_Date as timestamp 'yyyy-MM-dd',",
+				"          Price as integer",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"source1 derive(Launch_Date = case(\r",
+				"    isNull(Launch_Date) || Launch_Date == '', '0000-00-00',\r",
+				"    \r",
+				"    instr(Launch_Date, '-')!=0,\r",
+				"        Launch_Date,\r",
+				"\r",
+				"    instr(Launch_Date, '/')!=0,\r",
+				"        toString(\r",
+				"            toTimestamp(Launch_Date, 'dd/MM/yyyy'),\r",
+				"            'yyyy-MM-dd'\r",
+				"        ),\r",
+				"\r",
+				"    toString(\r",
+				"        toTimestamp(Launch_Date, 'MMM dd yyyy'),\r",
+				"        'yyyy-MM-dd'\r",
+				"    )\r",
+				"),",
+				"          notes = coalesce(notes,'Missing Note')) ~> derivedColumn1",
+				"cast1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Product_ID as string,",
+				"          Product_Name as string,",
+				"          Category_ID as string,",
+				"          Launch_Date as timestamp,",
+				"          Price as integer,",
+				"          notes as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Product_ID,",
+				"          Product_Name,",
+				"          Category_ID,",
+				"          Launch_Date,",
+				"          Price,",
+				"          notes",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
