@@ -1,0 +1,74 @@
+{
+	"name": "df_gold_dim_fechas",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_silver_tabla_products",
+						"type": "DatasetReference"
+					},
+					"name": "sales"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_tabla_products",
+						"type": "DatasetReference"
+					},
+					"name": "product"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_silver_tabla_warranty",
+						"type": "DatasetReference"
+					},
+					"name": "warranty"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "union2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          sale_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT  sale_date AS date FROM silver.sales',",
+				"     format: 'query') ~> sales",
+				"source(output(",
+				"          Launch_Date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT Launch_Date AS date FROM silver.products',",
+				"     format: 'query') ~> product",
+				"source(output(",
+				"          claim_id as string,",
+				"          claim_date as timestamp,",
+				"          sale_id as string,",
+				"          repair_status as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT DISTINCT claim_date AS dateFROM silver.warranty as date',",
+				"     format: 'query') ~> warranty",
+				"sales, product union(byName: true)~> union1",
+				"union1, warranty union(byName: true)~> union2"
+			]
+		}
+	}
+}
