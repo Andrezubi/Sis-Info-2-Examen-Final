@@ -1,5 +1,5 @@
 {
-	"name": "df_transformar_sales",
+	"name": "df_transformar_warranties",
 	"properties": {
 		"folder": {
 			"name": "Silver"
@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "ds_bronze_tabla_sales",
+						"referenceName": "ds_bronze_tabla_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_silver_tabla_sales",
+						"referenceName": "ds_silver_tabla_warranty",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -34,45 +34,43 @@
 			],
 			"scriptLines": [
 				"source(output(",
-				"          sale_jd as string,",
-				"          sale_date as string,",
-				"          store_id as string,",
-				"          product_id as string,",
-				"          quantity as string",
+				"          claim_id as string,",
+				"          claim_date as string,",
+				"          sale_id as string,",
+				"          repair_status as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
 				"derivedColumn1 cast(output(",
-				"          sale_date as date 'dd-MM-yyyy'",
+				"          claim_date as timestamp 'yyyy-MM-dd'",
 				"     ),",
 				"     errors: true) ~> cast1",
-				"source1 derive(sale_date = case(\r",
-				"    isNull(sale_date) || sale_date == '', '0000-00-00',\r",
+				"source1 derive(claim_date = case(\r",
+				"    isNull(claim_date) || claim_date == '', '0000-00-00',\r",
 				"    \r",
-				"    instr(sale_date, '-')!=0,\r",
-				"        sale_date,\r",
+				"    instr(claim_date, '-')!=0,\r",
+				"        claim_date,\r",
 				"\r",
-				"    instr(sale_date, '/')!=0,\r",
+				"    instr(claim_date, '/')!=0,\r",
 				"        toString(\r",
-				"            toTimestamp(sale_date, 'dd/MM/yyyy'),\r",
+				"            toTimestamp(claim_date, 'dd/MM/yyyy'),\r",
 				"            'yyyy-MM-dd'\r",
 				"        ),\r",
 				"\r",
 				"    toString(\r",
-				"        toTimestamp(sale_date, 'MMM dd yyyy'),\r",
+				"        toTimestamp(claim_date, 'MMM dd yyyy'),\r",
 				"        'yyyy-MM-dd'\r",
 				"    )\r",
 				")) ~> derivedColumn1",
 				"cast1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
-				"          sale_jd as string,",
-				"          sale_date as timestamp,",
-				"          store_id as string,",
-				"          product_id as string,",
-				"          quantity as integer",
+				"          claim_id as string,",
+				"          claim_date as timestamp,",
+				"          sale_id as string,",
+				"          repair_status as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -81,7 +79,13 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          claim_id,",
+				"          claim_date,",
+				"          sale_id,",
+				"          repair_status",
+				"     )) ~> sink1"
 			]
 		}
 	}

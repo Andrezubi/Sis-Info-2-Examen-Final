@@ -27,6 +27,9 @@
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -39,8 +42,9 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive(category_name = coalesce(category_name, 'MISSING NAME'),",
+				"derivedColumn2 derive(category_name = coalesce(category_name, 'MISSING NAME'),",
 				"          extra_note = coalesce(extra_note, 'MISSING NOTE')) ~> derivedColumn1",
+				"source1 derive(category_name = coalesce(category_name,\"Missing Name\")) ~> derivedColumn2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
