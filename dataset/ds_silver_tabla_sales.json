@@ -1,0 +1,43 @@
+{
+	"name": "ds_silver_tabla_sales",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Silver"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "sale_jd",
+				"type": "nvarchar"
+			},
+			{
+				"name": "sale_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "store_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "product_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "quantity",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "silver",
+			"table": "sales"
+		}
+	}
+}
