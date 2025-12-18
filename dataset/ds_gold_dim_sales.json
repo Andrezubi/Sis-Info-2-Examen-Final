@@ -1,0 +1,42 @@
+{
+	"name": "ds_gold_dim_sales",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "sale_jd",
+				"type": "nvarchar"
+			},
+			{
+				"name": "sale_date_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "store_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "product_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "quantity",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_sales"
+		}
+	}
+}

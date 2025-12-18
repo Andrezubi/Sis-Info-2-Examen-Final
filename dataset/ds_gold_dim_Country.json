@@ -1,0 +1,29 @@
+{
+	"name": "ds_gold_dim_Country",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "countryId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "countryName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_country"
+		}
+	}
+}

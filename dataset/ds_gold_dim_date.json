@@ -1,0 +1,59 @@
+{
+	"name": "ds_gold_dim_date",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dw_apple",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "dateId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "fullDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "year",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "month",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "monthName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "day",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "quarter",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "weekdayName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_date"
+		}
+	}
+}
